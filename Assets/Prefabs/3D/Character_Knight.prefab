@@ -1,5 +1,74 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &690155143138953400
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5009921514678986771}
+  - component: {fileID: 1706683717466331373}
+  - component: {fileID: 8772207048521080866}
+  m_Layer: 0
+  m_Name: Stats
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5009921514678986771
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 690155143138953400}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6909106327845981135}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1706683717466331373
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 690155143138953400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f8f04a4eaf3db64394e5d5e1bacbada, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxValue: 100
+  smoothSpeed: 10
+  regenSpeed: 5
+  startMax: 1
+  uiComponent: {fileID: 0}
+  currentValue: 0
+--- !u!114 &8772207048521080866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 690155143138953400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0a6297cc74a2d440a4fd2e528ed3f5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxValue: 300
+  smoothSpeed: 10
+  regenSpeed: 0
+  startMax: 0
+  uiComponent: {fileID: 0}
+  currentValue: 0
 --- !u!1 &1508183207931828116
 GameObject:
   m_ObjectHideFlags: 0
@@ -11,12 +80,12 @@ GameObject:
   - component: {fileID: 6909106327845981135}
   - component: {fileID: 506426285055641478}
   - component: {fileID: 2781043076540624734}
-  - component: {fileID: 3817611071809312165}
-  - component: {fileID: 8559662678537318338}
-  - component: {fileID: 356902147676402266}
+  - component: {fileID: -8539218940258008724}
+  - component: {fileID: -89982096008053430}
+  - component: {fileID: 6947947141524346653}
   m_Layer: 0
-  m_Name: Character _Knight
-  m_TagString: Untagged
+  m_Name: Character_Knight
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -33,7 +102,8 @@ Transform:
   m_LocalPosition: {x: 0, y: -0.932, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5009921514678986771}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &506426285055641478
@@ -109,42 +179,40 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!50 &3817611071809312165
-Rigidbody2D:
-  serializedVersion: 4
+--- !u!54 &-8539218940258008724
+Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1508183207931828116}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 0.5
-  m_LinearDrag: 2
-  m_AngularDrag: 1
-  m_GravityScale: 2.5
-  m_Material: {fileID: 0}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 0
-  m_CollisionDetection: 1
-  m_Constraints: 4
---- !u!70 &8559662678537318338
-CapsuleCollider2D:
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 120
+  m_CollisionDetection: 0
+--- !u!65 &-89982096008053430
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1508183207931828116}
-  m_Enabled: 1
-  m_Density: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -153,25 +221,13 @@ CapsuleCollider2D:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
   m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.32}
-  m_Size: {x: 0.46, y: 1.5}
-  m_Direction: 0
---- !u!114 &356902147676402266
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 2}
+  m_Center: {x: 0, y: -0.51, z: 0}
+--- !u!114 &6947947141524346653
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -180,11 +236,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 1508183207931828116}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d9c0cedcd8be3549b1232c1f2683f0e, type: 3}
+  m_Script: {fileID: 11500000, guid: e73eb9247f0f98d499b8925fc2dc419e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  assignedPlayerNum: 1
+  anim: {fileID: 2781043076540624734}
+  rbody: {fileID: -8539218940258008724}
+  health: {fileID: 1706683717466331373}
+  energy: {fileID: 8772207048521080866}
+  attackKey: 112
+  moveSpeed: 8
+  jumpForce: 15
   groundLayer:
     serializedVersion: 2
-    m_Bits: 16
+    m_Bits: 8
   groundCheckTransform: {fileID: 6909106327845981135}
-  groundCheckRadius: 1.7
+  groundCheckRadius: 0.2
+  canContinueAttackCombo: 0
+  currentAttackAnim: 0

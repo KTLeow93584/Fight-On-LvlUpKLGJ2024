@@ -16,12 +16,14 @@ public class Jump_Behaviour : Input_Behaviour
     // ----------------------------------------
     void FixedUpdate()
     {
+        // Fall downwards faster over time.
         if (rbody.velocity.y < 0.0f)
             rbody.AddForce(Vector2.down * gravitationalPullForce);
+        // Make the jump rise slower over time.
         else if (rbody.velocity.y > 0.0f)
             rbody.AddForce(Vector2.down * (gravitationalPullForce * 0.5f));
     }
-
+    // ----------------------------------------
     public override void onKeyPressed(Animator anim, ref List<int> currentKeysPressed, ref List<int> currentMotionKeysPressed)
     {
         InputMapper mappedInput = InputMapper.UP;
