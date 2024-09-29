@@ -510,6 +510,22 @@ public class Input_Reader : MonoBehaviour
                 break;
         }
     }
+
+    public void StopAttack()
+    {
+        isAttacking = false;
+
+        UpdatePlayerState(isGrounded);
+        foreach (Input_Behaviour atkInput in groundAtkInputBehaviourList)
+        {
+            if (atkInput.isPressed)
+                atkInput.isPressed = false;
+        }
+
+        Charge_Behaviour chargeBehaviour = GetComponentInChildren<Charge_Behaviour>();
+        if (chargeBehaviour.isPressed)
+            chargeBehaviour.isPressed = false;
+    }
     // ----------------------------------------
     public void StartCharging()
     {
@@ -528,7 +544,10 @@ public class Input_Reader : MonoBehaviour
         if (!isHit)
         {
             isHit = true;
-            UpdatePlayerState(isGrounded);
+            if (isAttacking)
+                StopAttack();
+            else
+                UpdatePlayerState(isGrounded);
         }
 
         if (!anim.GetCurrentAnimatorStateInfo(0).IsName(hurtAnim))
