@@ -674,6 +674,13 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 0
+    functionName: OnBeginPrimaryAttack
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 20
+    intParameter: 0
+    messageOptions: 0
   - time: 0.41666666
     functionName: StopAttack
     data: primary_ground

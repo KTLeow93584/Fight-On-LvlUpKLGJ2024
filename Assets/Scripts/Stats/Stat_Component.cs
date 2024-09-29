@@ -19,13 +19,23 @@ using TMPro;
     private float smoothSpeed = 10.0f;
 
     [SerializeField]
+    private float smoothDelay = 1.5f;
+    private float smoothTimer = 0.0f;
+
+    [SerializeField]
     private float regenSpeed = 0.0f;
-    
+
+    [SerializeField]
+    private bool regenTilThreshold = false;
+
     [SerializeField]
     private bool startMax = true;
     // -------------------------------------
+    public bool isRegenDisabled = false;
+
     public TextMeshProUGUI indicatorText = null;
-    public Slider uiComponent = null;
+    public Slider smoothTransitionUIIndicator = null;
+    public Slider noTransitionUIIndicator = null;
     // -------------------------------------
     [SerializeField]
     private float currentValue;
@@ -37,6 +47,7 @@ using TMPro;
     // Start is called before the first frame update
     protected virtual void Start()
     {
+        smoothTimer = 0.0f;
         ResetToMax();
     }
 
@@ -44,29 +55,51 @@ using TMPro;
     protected virtual void Update()
     {
         UpdateRegen();
-        float rateOfChange = (smoothSpeed * Time.deltaTime) * (Mathf.Clamp(newThresholdValue - currentValue, -1.0f, 1.0f)) ;
-        
-        if (Mathf.Abs(newThresholdValue - currentValue) < Mathf.Abs(rateOfChange))
-            currentValue = newThresholdValue;
-        else
-            currentValue += rateOfChange;
 
-        if (indicatorText)
+        if (currentValue != newThresholdValue)
+            smoothTimer += Time.deltaTime;
+        
+        if (smoothTimer >= smoothDelay)
         {
-            // Float Precision Error To Prevent.
-            float stageAt = (currentValue / maxValue) * stageCount;
-            indicatorText.text = (float)stageCount - stageAt < 0.01 ? stageCount.ToString() : Mathf.Floor(stageAt).ToString();
+            float rateOfChange = (smoothSpeed * Time.deltaTime) * (Mathf.Clamp(newThresholdValue - currentValue, -1.0f, 1.0f));
+
+            if (Mathf.Abs(newThresholdValue - currentValue) < 0.01f)
+            {
+                smoothTimer = 0.0f;
+                currentValue = newThresholdValue;
+            }
+            else
+                currentValue += rateOfChange;
+
+            if (indicatorText)
+            {
+                // Float Precision Error To Prevent.
+                float stageAt = (currentValue / maxValue) * stageCount;
+                indicatorText.text = (float)stageCount - stageAt < 0.01 ? stageCount.ToString() : Mathf.Floor(stageAt).ToString();
+            }
         }
 
-        if (uiComponent)
-            uiComponent.value = currentValue/maxValue;
+        if (smoothTransitionUIIndicator)
+            smoothTransitionUIIndicator.value = currentValue / maxValue;
+
+        if (noTransitionUIIndicator)
+            noTransitionUIIndicator.value = newThresholdValue / maxValue;
     }
     // -------------------------------------
     private void UpdateRegen()
     {
+        if (!isRegenDisabled)
+            return;
+
         float regenAmount = regenSpeed * Time.deltaTime;
 
         newThresholdValue += regenAmount;
+
+        if (regenTilThreshold)
+        {
+            if (newThresholdValue >= currentValue)
+                newThresholdValue = currentValue;
+        }
         CheckThresholdCap();
     }
 
@@ -96,14 +129,23 @@ using TMPro;
         newThresholdValue = currentValue;
     }
     // -------------------------------------
-    public void SetUIComponent(Transform target)
+    public void SetUIComponent(Transform smoothTarget = null, Transform noSmoothTarget = null)
     {
-        uiComponent = target.GetComponent<Slider>();
+        if (smoothTarget)
+            smoothTransitionUIIndicator = smoothTarget.GetComponent<Slider>();
+
+        if (noSmoothTarget)
+            noTransitionUIIndicator = noSmoothTarget.GetComponent<Slider>();
     }
 
     public void SetIndicatorText(Transform target)
     {
         indicatorText = target.GetComponent<TextMeshProUGUI>();
+    }
+    // -------------------------------------
+    public float GetCurrentValue()
+    {
+        return newThresholdValue;
     }
     // -------------------------------------
 }

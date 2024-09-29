@@ -17,6 +17,9 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
     private bool isRunningLeft;
     private bool isRunningRight;
     // ----------------------------------------
+    [SerializeField]
+    private Input_Reader localReaderScript = null;
+    // ----------------------------------------
     // For the sake of game jam schedule, couply linked dependencies EVERYWHERE! Because why not.
     [SerializeField]
     Input_Behaviour jumpBehaviour = null;
@@ -24,6 +27,12 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
     protected override void Update()
     {
         if (!isBehaviourEnabled)
+        {
+            StopMovement();
+            return;
+        }
+
+        if (localReaderScript.IsBlocking())
         {
             StopMovement();
             return;
@@ -50,6 +59,13 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
 
     void FixedUpdate()
     {
+        if (localReaderScript.IsBlocking())
+        {
+            rbody.velocity = new Vector2(0.0f, rbody.velocity.y);
+            return;
+        }
+
+        // Non-Kinematic Movement
         if (isRunningLeft)
             rbody.velocity = new Vector2(-moveSpeed, rbody.velocity.y);
         else if (isRunningRight)
@@ -75,8 +91,8 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
                     currentKeysPressed.Add((int)mappedInput);
             }
 
-            if ((!jumpBehaviour || jumpBehaviour && !jumpBehaviour.isPressed) && isAnimEnabled && !anim.GetCurrentAnimatorStateInfo(0).IsName(targetAnimName))
-                anim.Play(targetAnimName);
+            ProcessMotionInput(anim);
+
             currentMotionKeysPressed.Add((int)mappedInput);
         }
         else if (Input.GetAxis("Horizontal_P" + player.assignedPlayerNum) < 0)
@@ -91,14 +107,25 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
                     currentKeysPressed.Add((int)mappedInput);
             }
 
-            if ((!jumpBehaviour || jumpBehaviour && !jumpBehaviour.isPressed) && isAnimEnabled && !anim.GetCurrentAnimatorStateInfo(0).IsName(targetAnimName))
-                anim.Play(targetAnimName);
+            ProcessMotionInput(anim);
             currentMotionKeysPressed.Add((int)mappedInput);
         }
         else
         {
             if (isPressed)
                 isPressed = false;
+        }
+    }
+
+    private void ProcessMotionInput(Animator anim)
+    {
+        if ((!jumpBehaviour || jumpBehaviour && !jumpBehaviour.isPressed) && !localReaderScript.IsBlocking())
+        {
+            if (isAnimEnabled)
+            {
+                if (!anim.GetCurrentAnimatorStateInfo(0).IsName(targetAnimName))
+                    anim.Play(targetAnimName);
+            }
         }
     }
     // ----------------------------------------
@@ -118,11 +145,11 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
 
     private void FlipSprite()
     {
-        if (rbody.velocity.x < 0)
+        if (Input.GetAxis("Horizontal_P" + player.assignedPlayerNum) < 0 && rbody.velocity.x < 0)
         {
             targetTransform.eulerAngles = new Vector3(0, 180, 0);
         }
-        else if (rbody.velocity.x > 0)
+        else if (Input.GetAxis("Horizontal_P" + player.assignedPlayerNum) > 0 && rbody.velocity.x > 0)
         {
             targetTransform.eulerAngles = new Vector3(0, 0, 0);
         }

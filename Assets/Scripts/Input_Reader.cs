@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 using UnityEngine;
 
@@ -13,7 +14,16 @@ public class Input_Reader : MonoBehaviour
     protected Rigidbody rbody;
 
     [SerializeField]
-    protected string idleAnim = "idle";
+    protected string idleAnim = "Idle";
+
+    [SerializeField]
+    protected string hurtAnim = "Hurt";
+
+    [SerializeField]
+    protected string blockAnim = "Block";
+
+    [SerializeField]
+    public Input_Reader otherPlayerInputReaderScript = null;
     // ----------------------------------------
     delegate void OnInputPressed(Animator anim, ref List<int> currentKeysPressed, ref List<int> currentMotionKeysPressed);
     OnInputPressed queryInputs = null;
@@ -73,9 +83,15 @@ public class Input_Reader : MonoBehaviour
     protected bool isAttacking = false;
 
     [SerializeField]
+    protected bool isHit = false;
+
+    [SerializeField]
     protected bool isCharging = false;
+
+    [SerializeField]
+    protected bool isBlocking = false;
     // ----------------------------------------
-    void Awake()
+    private void Awake()
     {
         inputBehaviourList = new List<Input_Behaviour>();
 
@@ -91,28 +107,46 @@ public class Input_Reader : MonoBehaviour
         if (anim)
             anim.Play(idleAnim);
 
-        UpdateGroundedState(isGrounded);
+        UpdatePlayerState(isGrounded);
     }
 
-    void OnEnable()
+    private void Start()
+    {
+        // Look for the other player's Input Reader Script.
+        if (player)
+        {
+            string targetName = player.assignedPlayerNum % 2 == 0 ? "_P1" : "_P2";
+            Transform[] allTransforms = FindObjectsOfType<Transform>(true);
+            Transform otherPlayerTransform = allTransforms.FirstOrDefault(obj => obj.name.EndsWith(targetName) && obj.GetComponent<Input_Reader>() != null);
+            if (otherPlayerTransform)
+                otherPlayerInputReaderScript = otherPlayerTransform.GetComponent<Input_Reader>();
+
+            // Debug
+            //Debug.Log("[" + gameObject.name + "] Target: " + targetName);
+            //Debug.Log("[" + gameObject.name + "] Result: " + otherPlayerInputReaderScript);
+        }
+    }
+
+    private void OnEnable()
     {
         foreach (Input_Behaviour inputBehaviour in inputBehaviourList)
             queryInputs += inputBehaviour.onKeyPressed;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         foreach (Input_Behaviour inputBehaviour in inputBehaviourList)
             queryInputs -= inputBehaviour.onKeyPressed;
     }
     // ----------------------------------------
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (!player || queryInputs == null)
+        if (!player || (player && !player.IsAlive()) || queryInputs == null)
             return;
-        queryInputs(anim, ref inputsPressedOnFrame, ref motionInputsPressedOnFrame);
 
+        queryInputs(anim, ref inputsPressedOnFrame, ref motionInputsPressedOnFrame);
+        // -----------------------------
         // User did not press a single key during this frame
         if (inputsPressedOnFrame.Count <= 0)
         {
@@ -135,15 +169,17 @@ public class Input_Reader : MonoBehaviour
             inputHistory.AddRange(inputsPressedOnFrame);
             timeSinceLastInput = 0.0f;
         }
-
+        // -----------------------------
         // No Inputs Pressed -> Idle or Falling down, depends on isGrounded
         if (motionInputsPressedOnFrame.Count == 0)
         {
-            if (isGrounded && Mathf.Abs(rbody.velocity.y) <= 0.01f && !isAttacking)
+            if (isGrounded)
             {
-                if (!anim.GetCurrentAnimatorStateInfo(0).IsName(idleAnim))
+                // Only Do Idle Anim if not attacking, got hit or is blocking.
+                if (Mathf.Abs(rbody.velocity.y) <= 0.01f && !isAttacking && !isHit && !isBlocking)
                 {
-                    anim.Play(idleAnim);
+                    if (!anim.GetCurrentAnimatorStateInfo(0).IsName(idleAnim))
+                        anim.Play(idleAnim);
                 }
             }
             else
@@ -160,7 +196,7 @@ public class Input_Reader : MonoBehaviour
         motionInputsPressedOnFrame.Clear();
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         CheckIfGrounded();
     }
@@ -318,18 +354,20 @@ public class Input_Reader : MonoBehaviour
         //Debug.Log("Touched Ground?: " + hitColliders.Length);
 
         if (grounded != isGrounded)
-            UpdateGroundedState(grounded);
+            UpdatePlayerState(grounded);
     }
 
-    private void UpdateGroundedState(bool newState)
+    // Nested IFs ftw.
+    private void UpdatePlayerState(bool newGroundedState)
     {
-        if (isGrounded != newState)
-            isGrounded = newState;
+        if (isGrounded != newGroundedState)
+            isGrounded = newGroundedState;
 
         // Debug
         //Debug.Log("Updating is Grounded State: " + isGrounded);
 
-        // If we are attacking, enable the following:
+
+        // If we are charging or got hit, enable the following:
         // N/A (Disable All Other Inputs)
         // 
         // Disable the following:
@@ -342,8 +380,12 @@ public class Input_Reader : MonoBehaviour
         //
         // Maintain:
         // 1. Charging
-        if (isCharging)
+        if (isHit || isCharging)
         {
+            if (isHit) {
+                DisableChargeInput();
+            }
+
             DisableGround();
             DisableAerial();
         }
@@ -363,15 +405,20 @@ public class Input_Reader : MonoBehaviour
                 // 1. Aerial Attacking
                 if (isGrounded)
                 {
-                    EnableGroundInputs();
-                    EnableGroundAtkInputs();
+                    if (isBlocking)
+                    {
+                        DisableGround();
+                        DisableAerial();
+                    }
+                    else
+                    {
+                        EnableGround();
 
-                    EnableGroundInputAnims();
+                        EnableAerialInputAnims();
+                        EnableAerialInputs();
 
-                    EnableAerialInputAnims();
-                    EnableAerialInputs();
-
-                    EnableChargeInput();
+                        EnableChargeInput();
+                    }
                 }
                 // If we are falling/jumping, enable the following:
                 // 1. Walking (Hor Movement)
@@ -406,7 +453,11 @@ public class Input_Reader : MonoBehaviour
             // 7. Walking (Hor Movement)
             else
             {
-                DisableGround();
+                if (isGrounded)
+                    DisableGround();
+                else
+                    DisableGroundAtkInputs();
+
                 DisableAerial();
                 DisableChargeInput();
             }
@@ -416,7 +467,8 @@ public class Input_Reader : MonoBehaviour
     public void StartAttack(string attackName)
     {
         isAttacking = true;
-        UpdateGroundedState(isGrounded);
+
+        UpdatePlayerState(isGrounded);
         //switch (attackName)
         //{
         //    case "primary_ground":
@@ -429,7 +481,8 @@ public class Input_Reader : MonoBehaviour
     public void StopAttack(string attackName)
     {
         isAttacking = false;
-        UpdateGroundedState(isGrounded);
+
+        UpdatePlayerState(isGrounded);
         switch (attackName)
         {
             case "primary_ground":
@@ -453,13 +506,76 @@ public class Input_Reader : MonoBehaviour
     public void StartCharging()
     {
         isCharging = true;
-        UpdateGroundedState(isGrounded);
+        UpdatePlayerState(isGrounded);
     }
 
     public void StopCharging()
     {
         isCharging = false;
-        UpdateGroundedState(isGrounded);
+        UpdatePlayerState(isGrounded);
+    }
+    // ----------------------------------------
+    public void OnHitByAttack()
+    {
+        if (!isHit)
+        {
+            isHit = true;
+            UpdatePlayerState(isGrounded);
+        }
+
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName(hurtAnim))
+            anim.Play(hurtAnim);
+    }
+
+    public void OnRecoverFromAttack()
+    {
+        if (isHit)
+        {
+            isHit = false;
+            UpdatePlayerState(isGrounded);
+        }
+    }
+    // ----------------------------------------
+    public bool IsMoving()
+    {
+        return !isAttacking && !isCharging && Input.GetAxis("Horizontal_P" + player.assignedPlayerNum) != 0;
+    }
+
+    public bool IsGrounded()
+    {
+        return isGrounded;
+    }
+
+    public bool IsBlocking()
+    {
+        return isBlocking;
+    }
+
+    public bool IsAttacking()
+    {
+        return isAttacking;
+    }
+
+    public void BeginBlock()
+    {
+        if (!isBlocking)
+        {
+            transform.eulerAngles = new Vector3(0, otherPlayerInputReaderScript.transform.position.x < transform.position.x ? 180 : 0, 0);
+            isBlocking = true;
+            UpdatePlayerState(isGrounded);
+
+            if (!anim.GetCurrentAnimatorStateInfo(0).IsName(blockAnim))
+                anim.Play(blockAnim);
+        }
+    }
+
+    public void EndBlock()
+    {
+        if (isBlocking)
+        {
+            isBlocking = false;
+            UpdatePlayerState(isGrounded);
+        }
     }
     // ----------------------------------------
 }

@@ -14,12 +14,35 @@ public class Player_Character : MonoBehaviour
 
     [SerializeField]
     private Rigidbody rbody;
+
+    [SerializeField]
+    private Collider hitbox = null;
     // -------------------------------
     [SerializeField]
     private Health_Component health = null;
 
     [SerializeField]
     private Energy_Component energy = null;
+
+    [SerializeField]
+    private float energyLeechMultiplier = 1.0f;
+    // -------------------------------
+    [SerializeField]
+    private Input_Reader readerScript = null;
+
+    private Coroutine blockCoroutine = null;
+    // -------------------------------
+    [SerializeField]
+    private float primaryAttackDamage = 0.0f;
+
+    [SerializeField]
+    private float secondaryAttackDamage = 0.0f;
+
+    [SerializeField]
+    private float comboDamage = 0.0f;
+
+    [SerializeField]
+    private float blockDuration = 0.6f;
     // -------------------------------
     private string idleAnim = "Idle";
     //private string crouchAnim = "Idle";
@@ -45,11 +68,32 @@ public class Player_Character : MonoBehaviour
     private bool isHoldingBlock;
     private bool isAttacking;
     private bool isDead;
+
     [SerializeField]
     private bool canContinueAttackCombo;
+
     [SerializeField]
     private int currentAttackAnim;
+
+    [SerializeField]
+    private float attackDamage = 0.0f;
+
+    [SerializeField]
+    private bool isAlive = false;
     // -------------------------------
+    private void OnEnable()
+    {
+        transform.eulerAngles = new Vector3(0.0f, assignedPlayerNum == 2 ? 180.0f : 0.0f, 0.0f);
+
+        if (hitbox && !hitbox.gameObject.activeSelf)
+            hitbox.gameObject.SetActive(true);
+
+        isAlive = true;
+
+        if (health)
+            health.isRegenDisabled = true;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -63,7 +107,11 @@ public class Player_Character : MonoBehaviour
             foreach (Transform child in playerTransform)
             {
                 if (child.gameObject.name == "Health Bar")
-                    health.SetUIComponent(child);
+                {
+                    Transform shadowHealthBar = child.Find("Shadow Health Bar");
+                    health.SetUIComponent(shadowHealthBar, child);
+                    health.isRegenDisabled = true;
+                }
                 if (child.gameObject.name == "Energy Bar")
                 {
                     energy.SetUIComponent(child);
@@ -96,6 +144,100 @@ public class Player_Character : MonoBehaviour
         //GetAttackInput();
         //GetHealInput();
         //FlipSprite();
+    }
+    // -------------------------------
+    public void OnHitByAttack(Transform attackSource, float damage)
+    {
+        // ----------------------------
+        int direction = attackSource.position.x < transform.position.x ? -1 : 1;
+
+        // Turn to face our attacker.
+        transform.eulerAngles = new Vector3(0.0f, direction == -1 ? 180.0f : 0.0f, 0.0f);
+        // ----------------------------
+        // If Attack is coming from the Left and I am holding the Right Key.
+        // Same if the Attack is coming from the Right and I am holding the Left Key.
+        // Block The Attack.
+        bool canBlock =
+            (direction == -1 && Input.GetAxis("Horizontal_P" + assignedPlayerNum) > 0) ||
+            (direction == 1 && Input.GetAxis("Horizontal_P" + assignedPlayerNum) < 0);
+
+        if (canBlock)
+        {
+            float blockCost = -damage * 0.5f;
+
+            // Debug
+            //Debug.Log("[On Receive Hit] To block this attack, I need " + blockCost + " energy.");
+            //Debug.Log("[On Receive Hit] I currently have " + energy.GetCurrentValue() + " energy.");
+
+            if (energy.GetCurrentValue() >= Mathf.Abs(blockCost))
+            {
+                if (readerScript.IsGrounded())
+                    readerScript.BeginBlock();
+
+                if (blockCoroutine != null)
+                    StopCoroutine(blockCoroutine);
+                blockCoroutine = StartCoroutine("StartTimeToEndBlock");
+                // ----------------------------
+                // Debug
+                //Debug.Log("I was hit by " + attackSource.gameObject.name + " but it was successfully blocked!");
+                // ----------------------------
+                energy.AddValue(blockCost);
+                return;
+            }
+            else
+            {
+                // Debug
+                //Debug.Log("[On Receive Hit] Failed to Block Attack due to lack of energy!");
+            }
+        }
+        // Otherwise, Take Damage
+
+        // Debug
+        //Debug.Log("[On Receive Hit] I was hit by " + attackSource.gameObject.name + " for " + damage + " damage.");
+        // ----------------------------
+        // Update Reader Script
+        // - Stop all existing input processes (E.g. isAttacking, isCharging)
+        // - Prevent Idle Animation, use Hit Animation instead.
+        readerScript.OnHitByAttack();
+        // ----------------------------
+        // Take Damage
+        health.AddValue(-damage);
+        // ----------------------------
+        Player_Character otherCharacterScript = attackSource.GetComponent<Player_Character>();
+
+        // Debug
+        //Debug.Log("Other Character: " + otherCharacterScript);
+
+        // Gain Energy for hitting target.
+        if (otherCharacterScript)
+            otherCharacterScript.energy.AddValue(damage * energyLeechMultiplier);
+        // ----------------------------
+        if (health.GetCurrentValue() <= 0)
+        {
+            isAlive = false;
+            StartCoroutine("OnDeath");
+        }
+        // ----------------------------
+    }
+
+    public float GetAttackDamage()
+    {
+        return attackDamage;
+    }
+
+    public void OnBeginPrimaryAttack()
+    {
+        attackDamage = primaryAttackDamage;
+    }
+
+    public void OnBeginSecondaryAttack()
+    {
+        attackDamage = secondaryAttackDamage;
+    }
+
+    public void OnBeginCombo()
+    {
+        attackDamage = comboDamage;
     }
     // -------------------------------
     #region INPUTS
@@ -144,7 +286,7 @@ public class Player_Character : MonoBehaviour
     //             GetHit();
     //     }
     // }
-    
+
     //private void GetHoldBlockInput()
     //{
     //    if (canReceiveInput)
@@ -329,5 +471,25 @@ public class Player_Character : MonoBehaviour
     //    }
     //}
     #endregion
+    // -------------------------------
+    public bool IsAlive()
+    {
+        return isAlive;
+    }
+    // -------------------------------
+    IEnumerator StartTimeToEndBlock()
+    {
+        yield return new WaitForSeconds(blockDuration);
+        readerScript.EndBlock();
+    }
+    // -------------------------------
+    protected IEnumerator OnDeath()
+    {
+        if (!anim.GetCurrentAnimatorStateInfo(0).IsName(deathAnim))
+            anim.Play(deathAnim);
+
+        health.isRegenDisabled = false;
+        yield return null;
+    }
     // -------------------------------
 }

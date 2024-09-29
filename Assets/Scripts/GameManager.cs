@@ -28,7 +28,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI timerTextComponent = null;
 
-    void Awake()
+    private void Awake()
     {
         if (!instance)
             instance = this;
@@ -36,7 +36,12 @@ public class GameManager : MonoBehaviour
             Destroy(this.gameObject);
     }
 
-    void Update()
+    private void Start()
+    {
+        Application.targetFrameRate = 90;
+    }
+
+    private void Update()
     {
         gameTime -= Time.deltaTime;
         if (gameTime < 0)
@@ -49,7 +54,7 @@ public class GameManager : MonoBehaviour
     }
 
     // TODO: Decide Winner then move to Victor Scene
-    void OnGameEnded()
+    private void OnGameEnded()
     {
         // Debug
         Debug.Log("Game Has Ended, Refreshing Scene.");
