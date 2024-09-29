@@ -2340,7 +2340,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a33cab006087ee41a70b3b73b988e33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameTime: 3
+  gameTime: 99
   timerTextComponent: {fileID: 1342957543}
   gameEndTextComponent: {fileID: 1033282920}
   playersParentTransform: {fileID: 1088832075}
@@ -3037,7 +3037,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectedLevel: {fileID: 11400000, guid: 6be17e50a6d412448a9eb483f5eed039, type: 2}
   player1: {fileID: 11400000, guid: a6a7f520eba2a9f40abd9eb878271ccf, type: 2}
-  player2: {fileID: 11400000, guid: a6a7f520eba2a9f40abd9eb878271ccf, type: 2}
+  player2: {fileID: 11400000, guid: 13a9e6aac67e6ca4ca7728b0bd0ab294, type: 2}
 --- !u!4 &1544306647
 Transform:
   m_ObjectHideFlags: 0

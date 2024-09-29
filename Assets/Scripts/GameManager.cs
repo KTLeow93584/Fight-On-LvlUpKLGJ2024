@@ -88,7 +88,8 @@ public class GameManager : MonoBehaviour
             GameObject player1GO = Instantiate(DataManager.instance.player1.targetPrefab);
             player1GO.transform.SetParent(playersParentTransform);
             player1GO.transform.position = p1StartingPosition;
-            player1GO.name = DataManager.instance.player2.characterName + "_P1";
+            player1GO.name = DataManager.instance.player1.characterName + "_P1";
+            player1GO.tag = "Player 1";
 
             characterScript = player1GO.GetComponent<Player_Character>();
             characterScript.assignedPlayerNum = 1;
@@ -98,6 +99,7 @@ public class GameManager : MonoBehaviour
             player2GO.transform.SetParent(playersParentTransform);
             player2GO.transform.position = p2StartingPosition;
             player2GO.name = DataManager.instance.player2.characterName + "_P2";
+            player2GO.tag = "Player 2";
 
             characterScript = player2GO.GetComponent<Player_Character>();
             characterScript.assignedPlayerNum = 2;

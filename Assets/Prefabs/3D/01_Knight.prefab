@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -1998956405479531371}
   - component: {fileID: 7229595941795766764}
   m_Layer: 7
-  m_Name: Character_Old Hunter
+  m_Name: 01_Knight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: 1499899418, guid: 2f430406f0aec0d43bd9ad726baa1a01, type: 3}
+  m_Sprite: {fileID: -548093525, guid: 8a5a2768f74b5cc44bc22c536a939d33, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -106,7 +106,7 @@ Animator:
   m_GameObject: {fileID: 329664251167123357}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 2c52b6c9a88132946a74d772020ff662, type: 2}
+  m_Controller: {fileID: 9100000, guid: bb12b98f47f01614b8b8d0077f0fa8bc, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -164,7 +164,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 2}
-  m_Center: {x: 0, y: -0.86, z: 0}
+  m_Center: {x: 0, y: -0.59, z: 0}
 --- !u!114 &-1998956405479531371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -177,22 +177,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e73eb9247f0f98d499b8925fc2dc419e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  assignedPlayerNum: 1
+  assignedPlayerNum: 0
   anim: {fileID: 8461764094825872526}
   rbody: {fileID: 7917139967883001021}
   hitbox: {fileID: 3760324891191204511}
+  spriteRenderer: {fileID: 0}
   health: {fileID: 760481426610269198}
   energy: {fileID: 6858001308409692195}
   energyLeechMultiplier: 0.75
   readerScript: {fileID: 7229595941795766764}
-  primaryAttackDamage: 120
-  secondaryAttackDamage: 50
+  primaryAttackDamage: 90
+  secondaryAttackDamage: 180
   comboDamage: 75
   blockDuration: 0.25
-  victoryAnim: BlockImpact
-  attackKey: 112
-  canContinueAttackCombo: 0
-  currentAttackAnim: 0
+  deathAnim: Death
+  victoryAnim: Heal
   attackDamage: 0
   isAlive: 0
 --- !u!114 &7229595941795766764

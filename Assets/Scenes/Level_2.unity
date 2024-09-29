@@ -2340,9 +2340,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a33cab006087ee41a70b3b73b988e33, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameTime: 3
+  gameTime: 99
   timerTextComponent: {fileID: 1342957543}
   gameEndTextComponent: {fileID: 1033282920}
+  playersParentTransform: {fileID: 0}
+  p1StartingPosition: {x: 0, y: 0, z: 0}
+  p2StartingPosition: {x: 0, y: 0, z: 0}
   fadeImage: {fileID: 625664346}
   transitionFadeSpeed: 1.15
   characterSelectSceneName: Character Selection
