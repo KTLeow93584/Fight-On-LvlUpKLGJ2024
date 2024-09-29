@@ -21,9 +21,6 @@ public class Input_Reader : MonoBehaviour
 
     [SerializeField]
     protected string blockAnim = "Block";
-
-    [SerializeField]
-    public Input_Reader otherPlayerInputReaderScript = null;
     // ----------------------------------------
     delegate void OnInputPressed(Animator anim, ref List<int> currentKeysPressed, ref List<int> currentMotionKeysPressed);
     OnInputPressed queryInputs = null;
@@ -75,6 +72,9 @@ public class Input_Reader : MonoBehaviour
 
     [SerializeField]
     private float timeSinceLastInput = 0.0f;
+
+    [SerializeField]
+    public Input_Reader otherPlayerInputReaderScript = null;
     // ----------------------------------------
     [SerializeField]
     protected bool isGrounded = false;
@@ -90,6 +90,8 @@ public class Input_Reader : MonoBehaviour
 
     [SerializeField]
     protected bool isBlocking = false;
+
+    private bool forceIdling = false;
     // ----------------------------------------
     private void Awake()
     {
@@ -142,7 +144,13 @@ public class Input_Reader : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if (!player || (player && !player.IsAlive()) || queryInputs == null)
+        if (forceIdling && isGrounded)
+        {
+            if (!anim.GetCurrentAnimatorStateInfo(0).IsName(idleAnim))
+                anim.Play(idleAnim);
+        }
+
+        if (!player || (player && !player.IsAlive()) || queryInputs == null || GameManager.instance.GetGameState() != GameState.START)
             return;
 
         queryInputs(anim, ref inputsPressedOnFrame, ref motionInputsPressedOnFrame);
@@ -576,6 +584,11 @@ public class Input_Reader : MonoBehaviour
             isBlocking = false;
             UpdatePlayerState(isGrounded);
         }
+    }
+    // ----------------------------------------
+    public void ForceToIdleState()
+    {
+        forceIdling = true;
     }
     // ----------------------------------------
 }

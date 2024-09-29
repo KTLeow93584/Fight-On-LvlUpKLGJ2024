@@ -189,6 +189,7 @@ MonoBehaviour:
   secondaryAttackDamage: 50
   comboDamage: 75
   blockDuration: 0.25
+  victoryAnim: BlockImpact
   attackKey: 112
   canContinueAttackCombo: 0
   currentAttackAnim: 0
@@ -211,7 +212,6 @@ MonoBehaviour:
   idleAnim: Idle
   hurtAnim: Hurt
   blockAnim: Block
-  otherPlayerInputReaderScript: {fileID: 0}
   player: {fileID: -1998956405479531371}
   groundLayer:
     serializedVersion: 2
@@ -234,6 +234,7 @@ MonoBehaviour:
   motionInputsPressedOnFrame: 
   lastInputValue: 8
   timeSinceLastInput: 0
+  otherPlayerInputReaderScript: {fileID: 0}
   isGrounded: 0
   isAttacking: 0
   isHit: 0

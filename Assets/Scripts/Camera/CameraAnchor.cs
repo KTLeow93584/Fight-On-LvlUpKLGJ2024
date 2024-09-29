@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 
 public class CameraAnchor : MonoBehaviour
@@ -24,11 +26,18 @@ public class CameraAnchor : MonoBehaviour
     // Start is called before the first frame update
     private void Start()
     {
-        if (!anchorP1)
-            anchorP1 = GameObject.Find("P1").transform;
+        Transform[] allTransforms = FindObjectsOfType<Transform>(true);
+        string[] targetName = { "_P1", "_P2" };
 
-        if (!anchorP2)
-            anchorP2 = GameObject.Find("P2").transform;
+        foreach (string iterName in targetName)
+        {
+            Transform playerTransform = allTransforms.FirstOrDefault(obj => obj.name.EndsWith(iterName));
+
+            if (iterName == "_P1" && !anchorP1)
+                anchorP1 = playerTransform;
+            else if (iterName == "_P2" && !anchorP2)
+                anchorP2 = playerTransform;
+        }
 
         originalZPosition = transform.position.z;
     }

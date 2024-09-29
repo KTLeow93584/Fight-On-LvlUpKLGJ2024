@@ -26,7 +26,7 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
     // ----------------------------------------
     protected override void Update()
     {
-        if (!isBehaviourEnabled)
+        if (!isBehaviourEnabled || GameManager.instance.GetGameState() != GameState.START)
         {
             StopMovement();
             return;
@@ -59,6 +59,12 @@ public class Horizontal_Movement_Behaviour : Input_Behaviour
 
     void FixedUpdate()
     {
+        if (GameManager.instance.GetGameState() != GameState.START)
+        {
+            StopMovement();
+            return;
+        }
+
         if (localReaderScript.IsBlocking())
         {
             rbody.velocity = new Vector2(0.0f, rbody.velocity.y);

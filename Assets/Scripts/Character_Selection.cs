@@ -70,6 +70,9 @@ public class Character_Selection : MonoBehaviour
 
     [SerializeField]
     private float transitionFadeSpeed = 0.0f;
+
+    [SerializeField]
+    private string mainMenuSceneName = "";
     // -------------------------------------
     [SerializeField]
     private AudioSource submitSFX = null;
@@ -99,6 +102,8 @@ public class Character_Selection : MonoBehaviour
     private bool p2_lock = false;
     private Color p2_selectorColor = Color.white;
     private Coroutine p2_confirmCoroutine;
+    // -------------------------------------
+    private bool isExitingScene = false;
     // -------------------------------------
     void Start()
     {
@@ -158,6 +163,9 @@ public class Character_Selection : MonoBehaviour
     void Update()
     {
         // ---------------------
+        if (isExitingScene)
+            return;
+        // ---------------------
         // Level Selection Section
         if (levelSelectorGO.gameObject.activeSelf)
         {
@@ -205,12 +213,19 @@ public class Character_Selection : MonoBehaviour
         // Character Selection Section
         else
         {
+            // Player 1 or Player 2 Cancels - Exit to Main Menu
+            if (!p1_lock && !p2_lock && (Input.GetAxis("Cancel_P1") > 0 || Input.GetAxis("Cancel_P2") > 0))
+            {
+                LoadMenu();
+                return;
+            }
+            // ------------------------
             if (!p1_lock)
                 MapP1GridMovement();
 
             if (!p2_lock)
                 MapP2GridMovement();
-
+            // ------------------------
             // Player 1 Lock In Character
             if (Input.GetAxis("Submit_P1") > 0)
             {
@@ -218,11 +233,13 @@ public class Character_Selection : MonoBehaviour
                 {
                     p1_lock = true;
                     p1_confirmCoroutine = StartCoroutine(OnLockIn(0));
+                    SelectPlayerP1();
                 }
             }
             // Player 1 Cancel Lock In Character
-            if (Input.GetAxis("Cancel_P1") > 0)
+            else if (Input.GetAxis("Cancel_P1") > 0)
                 CancelLockIn(0, true);
+            // ------------------------
             // Player 2 Lock In Character
             if (Input.GetAxis("Submit_P2") > 0)
             {
@@ -230,11 +247,13 @@ public class Character_Selection : MonoBehaviour
                 {
                     p2_lock = true;
                     p2_confirmCoroutine = StartCoroutine(OnLockIn(1));
+                    SelectPlayerP2();
                 }
             }
+            // Player 2 Cancel Lock In Character
             else if (Input.GetAxis("Cancel_P2") > 0)
                 CancelLockIn(1, true);
-
+            // ------------------------
             p1_selectorColor = p1_selectorOutline.color;
             p2_selectorColor = p2_selectorOutline.color;
         }
@@ -299,6 +318,8 @@ public class Character_Selection : MonoBehaviour
     private void SelectPlayerP1()
     {
         Character_Data characterData = characterList[p1_gridIndexY * NUMBER_OF_CHARACTERS_PER_ROW + p1_gridIndexX];
+        if (DataManager.instance)
+            DataManager.instance.SetPlayer1CharacterData(characterData);
         Debug.Log("Player 1 has locked into: " + characterData);
     }
     // -------------------------------------
@@ -360,6 +381,8 @@ public class Character_Selection : MonoBehaviour
     private void SelectPlayerP2()
     {
         Character_Data characterData = characterList[p2_gridIndexY * NUMBER_OF_CHARACTERS_PER_ROW + p2_gridIndexX];
+        if (DataManager.instance)
+            DataManager.instance.SetPlayer2CharacterData(characterData);
         Debug.Log("Player 2 has locked into: " + characterData);
     }
     // -------------------------------------
@@ -456,13 +479,51 @@ public class Character_Selection : MonoBehaviour
     {
         if (levelSelectorBGPanel)
             levelSelectorBGPanel.sprite = levelList[levelIndex].levelBG;
+
+        if (DataManager.instance)
+            DataManager.instance.SetLevelData(levelList[levelIndex]);
+    }
+
+    void LoadMenu()
+    {
+        StartCoroutine("TransitionToMainMenu");
     }
 
     void LoadTargetLevel()
     {
+        if (!isExitingScene)
+            isExitingScene = true;
         StartCoroutine("TransitionToGameLevel");
     }
     // -------------------------------------
+    IEnumerator TransitionToMainMenu()
+    {
+        if (transitionSFX)
+            transitionSFX.Play();
+
+        if (fadeImage)
+        {
+            fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, 0.0f);
+            if (!fadeImage.gameObject.activeSelf)
+                fadeImage.gameObject.SetActive(true);
+
+            while (fadeImage.color.a < 1.0f)
+            {
+                fadeImage.color = new Color(
+                    fadeImage.color.r,
+                    fadeImage.color.g,
+                    fadeImage.color.b,
+                    Mathf.Clamp(fadeImage.color.a + (transitionFadeSpeed * Time.deltaTime), 0.0f, 1.0f)
+                );
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        SceneManager.LoadScene(mainMenuSceneName);
+    }
+    // ---------------------------------
     IEnumerator TransitionToGameLevel()
     {
         if (transitionSFX)

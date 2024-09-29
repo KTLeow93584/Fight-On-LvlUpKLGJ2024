@@ -31,7 +31,7 @@ public class Input_Behaviour : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
-        if (!isBehaviourEnabled)
+        if (!isBehaviourEnabled || GameManager.instance.GetGameState() != GameState.START)
             return;
     }
     // ----------------------------------------
