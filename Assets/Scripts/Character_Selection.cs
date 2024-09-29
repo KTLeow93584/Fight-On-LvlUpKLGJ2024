@@ -62,6 +62,9 @@ public class Character_Selection : MonoBehaviour
     [SerializeField]
     private Image levelSelectorBGPanel = null;
 
+    [SerializeField]
+    private TextMeshProUGUI levelSelectorNameText = null;
+
     private int levelIndex = 0;
     private bool isLevelSwitched = false;
 
@@ -492,6 +495,9 @@ public class Character_Selection : MonoBehaviour
     {
         if (levelSelectorBGPanel)
             levelSelectorBGPanel.sprite = levelList[levelIndex].levelBG;
+
+        if (levelSelectorNameText)
+            levelSelectorNameText.text = levelList[levelIndex].levelName;
 
         if (DataManager.instance)
             DataManager.instance.SetLevelData(levelList[levelIndex]);

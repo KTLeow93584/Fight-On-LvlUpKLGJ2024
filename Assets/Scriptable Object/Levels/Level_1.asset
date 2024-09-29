@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Level_1
   m_EditorClassIdentifier: 
   sceneName: Level_1
-  levelBG: {fileID: 21300000, guid: 6a6a42beda856404aad7b07445f0a366, type: 3}
+  levelName: Foggy Level
+  levelBG: {fileID: 21300000, guid: 19c38b7a962248a4c984e52cca29fa38, type: 3}

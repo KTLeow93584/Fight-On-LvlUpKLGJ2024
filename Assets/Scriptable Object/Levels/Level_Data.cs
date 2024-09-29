@@ -7,5 +7,6 @@ using UnityEngine;
 public class Level_Data : ScriptableObject
 {
     public string sceneName;
+    public string levelName;
     public Sprite levelBG;
 }
