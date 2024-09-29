@@ -82,6 +82,9 @@ public class Character_Selection : MonoBehaviour
 
     [SerializeField]
     private AudioSource transitionSFX = null;
+
+    [SerializeField]
+    private AudioSource gridMovementSFX = null;
     // -------------------------------------
     //[SerializeField]
     private int p1_gridIndexX = 0;
@@ -296,6 +299,9 @@ public class Character_Selection : MonoBehaviour
             p1_portrait.sprite = characterList[characterIndexAt].portraitSprite;
             p1_nameText.text = characterList[characterIndexAt].characterName;
 
+            if (gridMovementSFX)
+                gridMovementSFX.Play();
+
             SetP1Outline(characterIndexAt);
         }
     }
@@ -320,7 +326,9 @@ public class Character_Selection : MonoBehaviour
         Character_Data characterData = characterList[p1_gridIndexY * NUMBER_OF_CHARACTERS_PER_ROW + p1_gridIndexX];
         if (DataManager.instance)
             DataManager.instance.SetPlayer1CharacterData(characterData);
-        Debug.Log("Player 1 has locked into: " + characterData);
+
+        // Debug
+        //Debug.Log("Player 1 has locked into: " + characterData);
     }
     // -------------------------------------
     private void MapP2GridMovement()
@@ -359,6 +367,9 @@ public class Character_Selection : MonoBehaviour
             p2_portrait.sprite = characterList[characterIndexAt].portraitSprite;
             p2_nameText.text = characterList[characterIndexAt].characterName;
 
+            if (gridMovementSFX)
+                gridMovementSFX.Play();
+
             SetP2Outline(characterIndexAt);
         }
     }
@@ -383,7 +394,9 @@ public class Character_Selection : MonoBehaviour
         Character_Data characterData = characterList[p2_gridIndexY * NUMBER_OF_CHARACTERS_PER_ROW + p2_gridIndexX];
         if (DataManager.instance)
             DataManager.instance.SetPlayer2CharacterData(characterData);
-        Debug.Log("Player 2 has locked into: " + characterData);
+
+        // Debug
+        //Debug.Log("Player 2 has locked into: " + characterData);
     }
     // -------------------------------------
     IEnumerator OnLockIn(int playerIndex)
